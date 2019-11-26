@@ -1,1 +1,211 @@
-<h1>Playback</h1>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Playback</title>
+    <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="style.css" rel="stylesheet" type="text/css">
+  </head>
+
+  <body>
+    <div id='app'></div>
+
+    <script type='text/babel'>
+      /**
+       * What should happen when we're done programming this piece?
+       * - IDEAL - click square button in right menu, create sound modal should pop up. click upload, choose audio file, name sound button, create
+       * - Goal for this session - user story
+       *    - user clicks "add sound" on side menu
+       *    - new button appears with default name + incremented number, same sound file (crowd laughing) in the same row
+       *
+       * Sound audio button
+       *
+       *
+       */
+      class SoundButton extends React.Component {
+        constructor(props) {
+          super(props)
+          this.state = {
+            mode: "default",
+            play: false,
+          }
+          this.handleActivateButton = this.handleActivateButton.bind(this)
+        }
+
+        soundButtonAudio = new Audio("./audio-files/crowd-laughing-and-applauding.mp3")
+
+        handleActivateButton(props) {
+          if (this.state.mode == "default") { // JEFF - default isn't intuitive without context. Rename to something like "playback" or "playSound"
+            this.soundButtonAudio.load()
+            this.soundButtonAudio.play()
+          }
+        }
+
+        render() {
+          return (
+            <div>
+              <button className="soundButtonIcon" onClick={this.handleActivateButton}>
+                First button
+                {
+                  // add in editable title
+                }
+              </button>
+            </div>
+          )
+        }
+      }
+
+      function ButtonRow (props) {
+        return (
+          <div className="button-row">
+            { // map data (array of button data) to UI (actual SoundButton components)
+              props.buttons.map((button, index) => {
+                return (
+                  <SoundButton
+                    mode="default"
+                    key={index}
+                  />
+                )
+              })
+            }
+          </div>
+        )
+      }
+
+      class SoundGrid extends React.Component {
+        render() {
+          return (
+            <div>
+              {
+                this.props.grid.map((row, index) => {
+                  return (
+                    <ButtonRow buttons={row} key={index}/>
+                  )
+                })
+              }
+            </div>
+          )
+        }
+      }
+
+      class MenuBar extends React.Component {
+        constructor(props) {
+          super(props)
+          this.state = {
+            activeIcon: this.defaultPlayIcon,
+          }
+          this.defaultPlay = this.defaultPlay.bind(this)
+          this.addButton = props.addButtonHandler // assign to the function passed down
+          this.renameButton = this.renameButton.bind(this)
+          this.repositionButton = this.repositionButton.bind(this)
+          this.deleteButton = this.deleteButton.bind(this)
+          this.helpButton = this.helpButton.bind(this)
+        }
+        defaultPlayIcon = "./icons/default-play-icon.svg"
+        addButtonIcon = "./icons/add-button-icon.svg"
+        renameButtonIcon = "./icons/rename-icon.svg"
+        repositionButtonIcon = "./icons/reposition-icon.svg"
+        deleteButtonIcon = "./icons/trash-icon.svg"
+        helpButtonIcon = "./icons/help-icon.svg"
+
+        defaultPlay(props) {
+          this.setState((currentState) => {
+            return {
+              activeIcon: this.defaultPlayIcon,
+            }
+          })
+        }
+        renameButton(props) {
+
+        }
+        repositionButton(props) {
+
+        }
+        deleteButton(props) {
+
+        }
+        helpButton(props) {
+
+        }
+        render() {
+          return (
+            <div className="NavBar-container">
+              <li className = "activeMode"><img src={this.state.activeIcon} /></li>
+              <ul className="NavBar">
+                <li><img src={this.defaultPlayIcon} className="menuOption" onClick={this.defaultPlay}/></li>
+                <li><img src={this.addButtonIcon} className="menuOption" onClick={this.addButton}/></li>
+                <li><img src={this.renameButtonIcon} className="menuOption" onClick={this.renameButton}/></li>
+                <li><img src={this.repositionButtonIcon} className="menuOption" onClick={this.repositionButton}/></li>
+                <li><img src={this.deleteButtonIcon} className="menuOption" onClick={this.deleteButton}/></li>
+                <li><img src={this.helpButtonIcon} className="menuOption" onClick={this.helpButton}/></li>
+              </ul>
+            </div>
+          )
+
+        }
+      }
+
+      class App extends React.Component {
+        MAX_ROW_COUNT = 4
+        MAX_COLUMN_COUNT = 7
+
+        constructor () {
+          super()
+          this.state = {
+            soundGrid: [ // always four rows
+              [1,2,3,4],
+              [1],
+              [6,7,8],
+              [],
+            ],
+          }
+          this.addButton = this.addButton.bind(this)
+        }
+
+        addButton () {
+          this.setState(({soundGrid}) => {
+            let lowestAvailableRow;
+            for (let rowId = soundGrid.length - 1; rowId >= 0; rowId--) {
+              if (soundGrid[rowId].length < this.MAX_COLUMN_COUNT) {
+                lowestAvailableRow = rowId
+                break
+              }
+            }
+            if (lowestAvailableRow === undefined) {
+              alert("Your soundboard is full! Please delete a sound before adding a new one. :)")
+            } else {
+              return {
+                soundGrid: soundGrid.map((soundRow, index) => {
+                  if (index === lowestAvailableRow) {
+                    return soundRow.concat(9)
+                  } else {
+                    return soundRow.concat()
+                  }
+                })
+              }
+            }
+          })
+        }
+
+        render() {
+          console.log('render', this.state.soundGrid)
+          return (
+            <div>
+              <h1>Playback</h1>
+              <h3>Welcome to Playback, your personalized soundboard!</h3>
+              <div className="main-content-container">
+                <SoundGrid grid={ this.state.soundGrid } />
+                <MenuBar addButtonHandler={ this.addButton }/>
+              </div>
+            </div>
+          )
+        }
+      }
+      ReactDOM.render(
+        <App />,
+        document.getElementById('app')
+      )
+    </script>
+</body>
+</html>

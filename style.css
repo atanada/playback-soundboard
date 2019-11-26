@@ -1,0 +1,53 @@
+* {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.soundButtonIcon {
+  background-color: red;
+  width: 6em;
+  height: 6em;
+  line-height: 5.75em;
+  border-radius: 50%;
+  text-align: center;
+  color: white;
+  font-size: 1.5em;
+  margin: 0 2em 2em;
+}
+
+.soundButtonIcon:hover {
+  cursor: pointer;
+}
+
+h1, h3 {
+  text-align: center;
+}
+.main-content-container {
+  display: flex;
+  justify-content: space-between;
+  margin: 5em 0em;
+}
+
+.NavBar-container {
+  position: relative;
+}
+
+ul, .activeMode {
+  list-style: none;
+  width: 5em;
+  border: 0.25em solid #595959;
+  border-right: 0em;
+  border-radius:1em 0em 0em 1em;
+  padding: 0em;
+}
+
+ul {
+  margin-top: 1.5em;
+}
+
+.menuOption:hover {
+  cursor: pointer;
+}
+
+.button-row {
+  display: flex;
+}
