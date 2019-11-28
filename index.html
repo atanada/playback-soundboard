@@ -29,29 +29,27 @@
           this.state = {
             mode: "default",
             play: false,
+            name: props.button.name,
+            sound: props.button.sound,
           }
           this.handleActivateButton = this.handleActivateButton.bind(this)
         }
 
-        soundButtonAudio = new Audio("./audio-files/crowd-laughing-and-applauding.mp3")
-
         handleActivateButton(props) {
           if (this.state.mode == "default") { // JEFF - default isn't intuitive without context. Rename to something like "playback" or "playSound"
-            this.soundButtonAudio.load()
-            this.soundButtonAudio.play()
+            this.state.sound.load()
+            this.state.sound.play()
           }
         }
 
         render() {
           return (
-            <div>
-              <button className="soundButtonIcon" onClick={this.handleActivateButton}>
-                First button
-                {
-                  // add in editable title
-                }
-              </button>
-            </div>
+            <button className="soundButtonIcon" onClick={this.handleActivateButton}>
+              <div className="soundButtonText">{ this.state.name }</div>
+              {
+                // add in editable title
+              }
+            </button>
           )
         }
       }
@@ -65,6 +63,7 @@
                   <SoundButton
                     mode="default"
                     key={index}
+                    button={button}
                   />
                 )
               })
@@ -76,7 +75,7 @@
       class SoundGrid extends React.Component {
         render() {
           return (
-            <div>
+            <div className="soundButtonGrid">
               {
                 this.props.grid.map((row, index) => {
                   return (
@@ -146,6 +145,13 @@
         }
       }
 
+      class Sound {
+        constructor(name, soundPath) {
+          this.name = name
+          this.sound = new Audio('audio-files/' + soundPath)
+        }
+      }
+
       class App extends React.Component {
         MAX_ROW_COUNT = 4
         MAX_COLUMN_COUNT = 7
@@ -154,10 +160,34 @@
           super()
           this.state = {
             soundGrid: [ // always four rows
-              [1,2,3,4],
-              [1],
-              [6,7,8],
-              [],
+              [
+                new Sound('Trash Unit', 'Trash Unit.wav'),
+                new Sound('Water Control', 'Water Control.wav'),
+                new Sound('DE', 'DE.wav'),
+                new Sound('Doesn\'t Make Sense', 'Doesn\'t Make Sense.wav'),
+                new Sound('Equal Resources', 'Equal Resources.wav'),
+              ],
+              [
+                new Sound('Even Fight', 'Even Fight.wav'),
+                new Sound('Goths', 'Goths.wav'),
+                new Sound('HD', 'HD.wav'),
+                new Sound('Intro', 'Intro.wav'),
+                new Sound('Japanese Champions', 'Japanese Champions.wav'),
+              ],
+              [
+                new Sound('Not Close', 'Not Close.wav'),
+                new Sound('Nothing Wrong', 'Nothing Wrong.wav'),
+                new Sound('Number 8', 'Number 8.wav'),
+                new Sound('Number 9', 'Number 9.wav'),
+                new Sound('Number 10', 'Number 10.wav'),
+              ],
+              [
+                new Sound('Overpowered', 'Overpowered.wav'),
+                new Sound('Pretty Good Otherwise', 'Pretty Good Otherwise.wav'),
+                new Sound('Ridiculously Cheap', 'Ridiculously Cheap.wav'),
+                new Sound('Still a Strong Tech', 'Still a Strong Tech.wav'),
+                new Sound('Top 10', 'Top 10.wav'),
+              ],
             ],
           }
           this.addButton = this.addButton.bind(this)
@@ -165,7 +195,7 @@
 
         addButton () {
           this.setState(({soundGrid}) => {
-            let lowestAvailableRow;
+            let lowestAvailableRow
             for (let rowId = soundGrid.length - 1; rowId >= 0; rowId--) {
               if (soundGrid[rowId].length < this.MAX_COLUMN_COUNT) {
                 lowestAvailableRow = rowId
