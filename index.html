@@ -208,7 +208,7 @@
               return {
                 soundGrid: soundGrid.map((soundRow, index) => {
                   if (index === lowestAvailableRow) {
-                    return soundRow.concat(9)
+                    return soundRow.concat(new Sound('New Sound (Intro)', 'Intro.wav'))
                   } else {
                     return soundRow.concat()
                   }
