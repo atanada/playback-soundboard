@@ -1,69 +1,353 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Playback</title>
-    <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <link href="style.css" rel="stylesheet" type="text/css">
-  </head>
+<head>
+  <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+  <script crossorigin src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <title>Playback rewind</title>
+</head>
+<body>
+  <div id="app"></div>
+  <script type="text/babel">
 
-  <body>
-    <div id='app'></div>
+    const ModeData = {
+      playSoundMode: {
+        modeName: "playSoundMode",
+        iconPath: "./icons/default-play-icon.svg"
+        },
+      addButtonMode:{
+        modeName: "addButtonMode",
+        iconPath:"./icons/add-button-icon.svg"
+      },
+      renameButtonMode:{
+        modeName: "renameButtonMode",
+        iconPath:"./icons/rename-icon.svg"
+      },
+      repositionButtonMode:{
+        modeName: "repositionButtonMode",
+        iconPath:"./icons/reposition-icon.svg"
+      },
+      deleteButtonMode:{
+        modeName: "deleteButtonMode",
+        iconPath:"./icons/trash-icon.svg"
+      },
+      helpMode:{
+        modeName: "helpMode",
+        iconPath:"./icons/help-icon.svg"
+      },
+    }
 
-    <script type='text/babel'>
-      /**
-       * What should happen when we're done programming this piece?
-       * - IDEAL - click square button in right menu, create sound modal should pop up. click upload, choose audio file, name sound button, create
-       * - Goal for this session - user story
-       *    - user clicks "add sound" on side menu
-       *    - new button appears with default name + incremented number, same sound file (crowd laughing) in the same row
-       *
-       * Sound audio button
-       *
-       *
-       */
-      class SoundButton extends React.Component {
-        constructor(props) {
-          super(props)
-          this.state = {
-            mode: "default",
-            play: false,
-            name: props.button.name,
-            sound: props.button.sound,
-          }
-          this.handleActivateButton = this.handleActivateButton.bind(this)
+    const ModeContext = React.createContext({
+      currentMode: ModeData.playSoundMode,
+      switchMode:(newMode) => {},
+    })
+
+    class Sound {
+      constructor (name, filePath, id) {
+        this.name = name
+        this.audio = new Audio(filePath)
+        this.id = id
+      }
+      static newId = 0
+    }
+
+    const SoundNames = {
+      0: "Trash Unit",
+      1: "Water Control",
+      2: "DE",
+      3: "Doesn't Make Sense",
+      4: "Equal Resources",
+      5: "Even Fight",
+      6: "Goths",
+      7: "HD",
+      8: "Intro",
+      9: "Japanese Champions",
+      10: "Not Close",
+      11: "Nothing Wrong",
+      12: "Number 8",
+      13: "Number 9",
+      14: "Number 10",
+      15: "Overpowered",
+      16: "Pretty Good Otherwise",
+      17: "Ridiculously Cheap",
+      18: "Still a Strong Tech",
+      19: "Top 10",
+    }
+
+    const SoundsWithEditableNames = [
+      new Sound(SoundNames[0], "./audio-files/Trash Unit.wav", Sound.newId++),
+      new Sound(SoundNames[1], "./audio-files/Water Control.wav", Sound.newId++),
+      new Sound(SoundNames[2], "./audio-files/DE.wav", Sound.newId++),
+      new Sound(SoundNames[3], "./audio-files/Doesn't Make Sense.wav", Sound.newId++),
+      new Sound(SoundNames[4], "./audio-files/Equal Resources.wav", Sound.newId++),
+      new Sound(SoundNames[5], "./audio-files/Even Fight.wav", Sound.newId++),
+      new Sound(SoundNames[6], "./audio-files/Goths.wav", Sound.newId++),
+      new Sound(SoundNames[7], "./audio-files/HD.wav", Sound.newId++),
+      new Sound(SoundNames[8], "./audio-files/Intro.wav", Sound.newId++),
+      new Sound(SoundNames[9], "./audio-files/Japanese Champions.wav", Sound.newId++),
+      new Sound(SoundNames[10], "./audio-files/Not Close.wav", Sound.newId++),
+      new Sound(SoundNames[11], "./audio-files/Nothing Wrong.wav", Sound.newId++),
+      new Sound(SoundNames[12], "./audio-files/Number 8.wav", Sound.newId++),
+      new Sound(SoundNames[13], "./audio-files/Number 9.wav", Sound.newId++),
+      new Sound(SoundNames[14], "./audio-files/Number 10.wav", Sound.newId++),
+      new Sound(SoundNames[15], "./audio-files/Overpowered.wav", Sound.newId++),
+      new Sound(SoundNames[16], "./audio-files/Pretty Good Otherwise.wav", Sound.newId++),
+      new Sound(SoundNames[17], "./audio-files/Ridiculously Cheap.wav", Sound.newId++),
+      new Sound(SoundNames[18], "./audio-files/Still a Strong Tech.wav", Sound.newId++),
+      new Sound(SoundNames[19], "./audio-files/Top 10.wav", Sound.newId++),
+    ]
+
+    const Sounds = {
+      0: SoundsWithEditableNames[0],
+      1: SoundsWithEditableNames[1],
+      2: SoundsWithEditableNames[2],
+      3: SoundsWithEditableNames[3],
+      4: SoundsWithEditableNames[4],
+      5: SoundsWithEditableNames[5],
+      6: SoundsWithEditableNames[6],
+      7: SoundsWithEditableNames[7],
+      8: SoundsWithEditableNames[8],
+      9: SoundsWithEditableNames[9],
+      10: SoundsWithEditableNames[10],
+      11: SoundsWithEditableNames[11],
+      12: SoundsWithEditableNames[12],
+      13: SoundsWithEditableNames[13],
+      14: SoundsWithEditableNames[14],
+      15: SoundsWithEditableNames[15],
+      16: SoundsWithEditableNames[16],
+      17: SoundsWithEditableNames[17],
+      18: SoundsWithEditableNames[18],
+      19: SoundsWithEditableNames[19],
+    }
+
+    class App extends React.Component {
+      constructor(props) {
+        super(props)
+        this.switchMode = (newMode) => {
+          this.setState({
+            currentMode: ModeData[newMode],
+          })
         }
-
-        handleActivateButton(props) {
-          if (this.state.mode == "default") { // JEFF - default isn't intuitive without context. Rename to something like "playback" or "playSound"
-            this.state.sound.load()
-            this.state.sound.play()
-          }
+        this.state = {
+          soundGrid: [
+            [ Sounds[0], Sounds[1], Sounds[2], Sounds[3], Sounds[4] ],
+            [ Sounds[5], Sounds[6], Sounds[7], Sounds[8], Sounds[9] ],
+            [ Sounds[10], Sounds[11], Sounds[12], Sounds[13], Sounds[14] ],
+            [ Sounds[15], Sounds[16], Sounds[17], Sounds[18], Sounds[19] ],
+          ],
+          currentMode: ModeData.playSoundMode,
+          switchMode: this.switchMode,
+          newButtonName: "untitled",
         }
+        this.newAudio = Sounds[0].audio
+        this.newSoundButton = Sounds[0]
+        this.handleNewButtonName = this.handleNewButtonName.bind(this)
+        this.returnToPlaySoundMode = this.returnToPlaySoundMode.bind(this)
+        this.handleCreatingNewSoundButton = this.handleCreatingNewSoundButton.bind(this)
+        this.handleButtonClick = this.handleButtonClick.bind(this)
+      }
 
-        render() {
-          return (
-            <button className="soundButtonIcon" onClick={this.handleActivateButton}>
-              <div className="soundButtonText">{ this.state.name }</div>
-              {
-                // add in editable title
-              }
-            </button>
-          )
+      returnToPlaySoundMode () {
+        this.setState({
+          currentMode: ModeData.playSoundMode
+        })
+      }
+
+      handleNewButtonName (nameEvent) {
+        this.setState({
+          newButtonName: nameEvent.target.value
+        })
+      }
+
+      handleCreatingNewSoundButton (event) {
+        var reader = new FileReader()
+        const self = this
+        reader.onload = function() {
+          var path = this.result
+          self.newAudio = new Audio(path)
+          self.newSoundButton.audio = self.newAudio
+        }
+        reader.readAsDataURL(event.target.files[0])
+      }
+
+      handleButtonClick(soundId, newSoundName) {
+        this.clickedSound = Sounds[soundId]
+
+        if (this.state.currentMode === ModeData.playSoundMode) { // clicking on buttons will play their audio
+          console.log(this.clickedSound)
+          this.clickedSound.audio.load()
+          this.clickedSound.audio.play()
+
+        } else if (this.state.currentMode === ModeData.addButtonMode) { // this is to add buttons
+          const grid = this.state.soundGrid
+
+          for (var rowNum = grid.length - 1; rowNum > -1; rowNum--) {
+            if (grid[rowNum].length < 7) {
+              this.setState({
+                soundGrid: this.state.soundGrid.map((gridRow, index) => {
+                  if (index === rowNum) {
+
+                    var newSoundId = Sound.newId++
+                    this.newSoundButton.id = newSoundId
+                    SoundNames[newSoundId] = this.state.newButtonName
+                    this.newSoundButton.name = SoundNames[newSoundId]
+                    Sounds[newSoundId] = this.newSoundButton
+
+                    return gridRow.concat(Sounds[newSoundId])
+                  } else {
+                    return gridRow
+                  }
+                }),
+                newButtonName: "untitled",
+                currentMode: ModeData.playSoundMode
+              })
+              break
+            }
+          }
+          if (rowNum === -1) {
+            alert("Your board is full! Try deleteing a button before adding more.")
+          }
+        } else if (this.state.currentMode === ModeData.renameButtonMode) { // clicking on a button will change the name
+
+          this.setState({
+            soundGrid: this.state.soundGrid.map((row) => {
+              return (
+                row.map((sound) => {
+                  if (sound.id === soundId) {
+                    sound.name = newSoundName
+                  }
+                  return sound
+                })
+              )
+            })
+          })
+
+        } else if (this.state.currentMode === ModeData.repositionButtonMode) {
+          console.log("you're in", this.state.currentMode)
+
+        } else if (this.state.currentMode === ModeData.deleteButtonMode) { // clicking on a button will delete it
+          this.setState({
+            soundGrid: this.state.soundGrid.map((row, index) => {
+              return row.filter((sound) => sound.id !== soundId)
+            })
+          })
+        } else if (this.state.mode === ModeData.helpMode) {
+          console.log("you're in", this.state.currentMode)
         }
       }
 
-      function ButtonRow (props) {
+      render() {
+        if (this.state.currentMode === ModeData.addButtonMode) {
+          return (
+            <ModeContext.Provider value={{
+              currentMode: this.state.currentMode,
+              switchMode: this.state.switchMode,
+            }}>
+            <div>
+              <div className="modal">
+                <div className="modal-content">
+                  <p>Upload your own sound files! At this time, only WAV files are supported.</p>
+                  <p>New Sound Button Name: </p>
+                  <input
+                    type="text"
+                    value={ this.state.newButtonName }
+                    onChange={ this.handleNewButtonName }
+                  />
+                  <br/>
+                  <input
+                    type="file"
+                    accept="audio/wav"
+                    onChange={ this.handleCreatingNewSoundButton }
+                  />
+                  <div className="modal-confirmation-buttons-container">
+                    <button onClick={ this.handleButtonClick }>Add Sound Button</button>
+                    <button onClick={ this.returnToPlaySoundMode }>Cancel</button>
+                  </div>
+                </div>
+              </div>
+
+              <h1>Playback</h1>
+              <h3>Welcome to your personalized soundboard</h3>
+                <div className="main-content-container">
+                  <SoundGrid
+                    grid={ this.state.soundGrid }
+                    handleButtonClick={ this.handleButtonClick }
+                  />
+                  <div className="SideNav-container">
+                    <SideNav />
+                  </div>
+                </div>
+            </div>
+          </ModeContext.Provider>
+          )
+        }
         return (
-          <div className="button-row">
-            { // map data (array of button data) to UI (actual SoundButton components)
-              props.buttons.map((button, index) => {
+          <ModeContext.Provider value={{
+            currentMode: this.state.currentMode,
+            switchMode: this.state.switchMode,
+            }}>
+            <div>
+              <h1>Playback</h1>
+              <h3>Welcome to your personalized soundboard</h3>
+                <div className="main-content-container">
+                  <SoundGrid
+                    grid={ this.state.soundGrid }
+                    handleButtonClick={ this.handleButtonClick }
+                  />
+                  <div className="SideNav-container">
+                    <SideNav />
+                  </div>
+                </div>
+            </div>
+          </ModeContext.Provider>
+        )
+      }
+    }
+    App.contextType = ModeContext
+
+    function SideNav () {
+      return (
+        <ModeContext.Consumer>
+          {({currentMode, switchMode}) => (
+            <div>
+              <li className="activeMode"><img src={ currentMode.iconPath } /></li>
+              <ul>
+                {
+                  Object.keys(ModeData).map((selectedMode) => {
+                    return (
+                      <li key={ ModeData[selectedMode].modeName }>
+                        <img
+                          onClick={ () =>  switchMode(selectedMode) }
+                          src={ ModeData[selectedMode].iconPath }
+                          className="menuOption"
+                        />
+                      </li>
+                    )
+                  })
+                }
+              </ul>
+            </div>
+          )}
+        </ModeContext.Consumer>
+      )
+    }
+
+    class SoundGrid extends React.Component {
+      constructor(props) {
+        super(props)
+        this.handleButtonClick = props.handleButtonClick
+      }
+      render () {
+        return (
+          <div className="soundButtonGrid">
+            {
+              this.props.grid.map((row, index) => {
                 return (
-                  <SoundButton
-                    mode="default"
-                    key={index}
-                    button={button}
+                  <ButtonRow
+                    row={ row }
+                    key={ index }
+                    handleButtonClick={ this.handleButtonClick }
                   />
                 )
               })
@@ -71,171 +355,75 @@
           </div>
         )
       }
-
-      class SoundGrid extends React.Component {
-        render() {
-          return (
-            <div className="soundButtonGrid">
-              {
-                this.props.grid.map((row, index) => {
-                  return (
-                    <ButtonRow buttons={row} key={index}/>
-                  )
-                })
-              }
-            </div>
-          )
-        }
+    }
+    // this used to be a function, now it is a class for the sake of fast simplicity
+    // might change to function later after a better understanding of hooks
+    class ButtonRow extends React.Component {
+      constructor(props) {
+        super(props)
+        this.handleButtonClick = props.handleButtonClick
       }
-
-      class MenuBar extends React.Component {
-        constructor(props) {
-          super(props)
-          this.state = {
-            activeIcon: this.defaultPlayIcon,
-          }
-          this.defaultPlay = this.defaultPlay.bind(this)
-          this.addButton = props.addButtonHandler // assign to the function passed down
-          this.renameButton = this.renameButton.bind(this)
-          this.repositionButton = this.repositionButton.bind(this)
-          this.deleteButton = this.deleteButton.bind(this)
-          this.helpButton = this.helpButton.bind(this)
-        }
-        defaultPlayIcon = "./icons/default-play-icon.svg"
-        addButtonIcon = "./icons/add-button-icon.svg"
-        renameButtonIcon = "./icons/rename-icon.svg"
-        repositionButtonIcon = "./icons/reposition-icon.svg"
-        deleteButtonIcon = "./icons/trash-icon.svg"
-        helpButtonIcon = "./icons/help-icon.svg"
-
-        defaultPlay(props) {
-          this.setState((currentState) => {
-            return {
-              activeIcon: this.defaultPlayIcon,
+      render () {
+        return (
+          <div className="button-row">
+            {
+              this.props.row.map((sound, index) => {
+                return (
+                  <SoundButton
+                    sound={ sound }
+                    key={ index }
+                    handleButtonClick={ this.handleButtonClick }
+                  />
+                )
+              })
             }
-          })
-        }
-        renameButton(props) {
-
-        }
-        repositionButton(props) {
-
-        }
-        deleteButton(props) {
-
-        }
-        helpButton(props) {
-
-        }
-        render() {
-          return (
-            <div className="NavBar-container">
-              <li className = "activeMode"><img src={this.state.activeIcon} /></li>
-              <ul className="NavBar">
-                <li><img src={this.defaultPlayIcon} className="menuOption" onClick={this.defaultPlay}/></li>
-                <li><img src={this.addButtonIcon} className="menuOption" onClick={this.addButton}/></li>
-                <li><img src={this.renameButtonIcon} className="menuOption" onClick={this.renameButton}/></li>
-                <li><img src={this.repositionButtonIcon} className="menuOption" onClick={this.repositionButton}/></li>
-                <li><img src={this.deleteButtonIcon} className="menuOption" onClick={this.deleteButton}/></li>
-                <li><img src={this.helpButtonIcon} className="menuOption" onClick={this.helpButton}/></li>
-              </ul>
-            </div>
-          )
-
-        }
+          </div>
+        )
       }
+    }
 
-      class Sound {
-        constructor(name, soundPath) {
-          this.name = name
-          this.sound = new Audio('audio-files/' + soundPath)
+    class SoundButton extends React.Component {
+      constructor(props) {
+        super(props)
+        this.state = {
+          name: props.sound.name,
+          audio: props.sound.audio,
+          soundId: props.sound.id,
         }
+        this.handleNameChange = this.handleNameChange.bind(this)
       }
-
-      class App extends React.Component {
-        MAX_ROW_COUNT = 4
-        MAX_COLUMN_COUNT = 7
-
-        constructor () {
-          super()
-          this.state = {
-            soundGrid: [ // always four rows
-              [
-                new Sound('Trash Unit', 'Trash Unit.wav'),
-                new Sound('Water Control', 'Water Control.wav'),
-                new Sound('DE', 'DE.wav'),
-                new Sound('Doesn\'t Make Sense', 'Doesn\'t Make Sense.wav'),
-                new Sound('Equal Resources', 'Equal Resources.wav'),
-              ],
-              [
-                new Sound('Even Fight', 'Even Fight.wav'),
-                new Sound('Goths', 'Goths.wav'),
-                new Sound('HD', 'HD.wav'),
-                new Sound('Intro', 'Intro.wav'),
-                new Sound('Japanese Champions', 'Japanese Champions.wav'),
-              ],
-              [
-                new Sound('Not Close', 'Not Close.wav'),
-                new Sound('Nothing Wrong', 'Nothing Wrong.wav'),
-                new Sound('Number 8', 'Number 8.wav'),
-                new Sound('Number 9', 'Number 9.wav'),
-                new Sound('Number 10', 'Number 10.wav'),
-              ],
-              [
-                new Sound('Overpowered', 'Overpowered.wav'),
-                new Sound('Pretty Good Otherwise', 'Pretty Good Otherwise.wav'),
-                new Sound('Ridiculously Cheap', 'Ridiculously Cheap.wav'),
-                new Sound('Still a Strong Tech', 'Still a Strong Tech.wav'),
-                new Sound('Top 10', 'Top 10.wav'),
-              ],
-            ],
-          }
-          this.addButton = this.addButton.bind(this)
-        }
-
-        addButton () {
-          this.setState(({soundGrid}) => {
-            let lowestAvailableRow
-            for (let rowId = soundGrid.length - 1; rowId >= 0; rowId--) {
-              if (soundGrid[rowId].length < this.MAX_COLUMN_COUNT) {
-                lowestAvailableRow = rowId
-                break
-              }
-            }
-            if (lowestAvailableRow === undefined) {
-              alert("Your soundboard is full! Please delete a sound before adding a new one. :)")
-            } else {
-              return {
-                soundGrid: soundGrid.map((soundRow, index) => {
-                  if (index === lowestAvailableRow) {
-                    return soundRow.concat(new Sound('New Sound (Intro)', 'Intro.wav'))
-                  } else {
-                    return soundRow.concat()
-                  }
-                })
-              }
-            }
-          })
-        }
-
-        render() {
-          console.log('render', this.state.soundGrid)
+      handleNameChange(event) {
+        SoundNames[this.state.soundId] = event.target.value
+      }
+      onButtonClick() {
+        this.props.handleButtonClick(this.props.sound.id, SoundNames[this.state.soundId])
+      }
+      render () {
+        if (this.context.currentMode === ModeData.renameButtonMode) {
           return (
             <div>
-              <h1>Playback</h1>
-              <h3>Welcome to Playback, your personalized soundboard!</h3>
-              <div className="main-content-container">
-                <SoundGrid grid={ this.state.soundGrid } />
-                <MenuBar addButtonHandler={ this.addButton }/>
-              </div>
+              <button className="soundButtonIcon" onClick={ () => this.onButtonClick() }>
+                <input type="text" defaultValue={ this.state.name } onChange={ this.handleNameChange }/>
+                Save
+              </button>
             </div>
           )
         }
+        return (
+          <div>
+            <button className="soundButtonIcon" onClick={ () => this.onButtonClick() }>
+              <p className="soundButtonText"> { this.props.sound.name } </p>
+            </button>
+          </div>
+        )
       }
-      ReactDOM.render(
-        <App />,
-        document.getElementById('app')
-      )
-    </script>
+    }
+    SoundButton.contextType = ModeContext
+
+    ReactDOM.render(
+      <App />,
+      document.getElementById('app')
+    )
+  </script>
 </body>
 </html>
