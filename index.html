@@ -14,26 +14,32 @@
     const ModeData = {
       playSoundMode: {
         modeName: "playSoundMode",
+        isButtonDraggable: false,
         iconPath: "./icons/default-play-icon.svg"
         },
       addButtonMode:{
         modeName: "addButtonMode",
+        isButtonDraggable: false,
         iconPath:"./icons/add-button-icon.svg"
       },
       renameButtonMode:{
         modeName: "renameButtonMode",
+        isButtonDraggable: false,
         iconPath:"./icons/rename-icon.svg"
       },
       repositionButtonMode:{
         modeName: "repositionButtonMode",
+        isButtonDraggable: true,
         iconPath:"./icons/reposition-icon.svg"
       },
       deleteButtonMode:{
         modeName: "deleteButtonMode",
+        isButtonDraggable: false,
         iconPath:"./icons/trash-icon.svg"
       },
       helpMode:{
         modeName: "helpMode",
+        isButtonDraggable: false,
         iconPath:"./icons/help-icon.svg"
       },
     }
@@ -142,10 +148,17 @@
         }
         this.newAudio = Sounds[0].audio
         this.newSoundButton = Sounds[0]
+
+        // this.startPositionSoundId = 0
+        // this.endPositionSoundId = 0
+
         this.handleNewButtonName = this.handleNewButtonName.bind(this)
         this.returnToPlaySoundMode = this.returnToPlaySoundMode.bind(this)
         this.handleCreatingNewSoundButton = this.handleCreatingNewSoundButton.bind(this)
+
         this.handleButtonClick = this.handleButtonClick.bind(this)
+        this.handleButtonDrag = this.handleButtonDrag.bind(this)
+        this.handleButtonDrop = this.handleButtonDrop.bind(this)
       }
 
       returnToPlaySoundMode () {
@@ -171,6 +184,88 @@
         reader.readAsDataURL(event.target.files[0])
       }
 
+      handleButtonDrag(draggedSoundId) {
+        console.log("what we want to move", Sounds[draggedSoundId])
+        this.startPositionSoundId = draggedSoundId
+      }
+
+      handleButtonDrop(dropZoneSoundId) {
+        console.log("end position", Sounds[dropZoneSoundId])
+        this.endPositionSoundId = dropZoneSoundId
+
+        // assigning indices for our target sounds
+        var soundGridSize = 0
+        var startPositionSoundRowIndex = 0
+        var startPositionSoundIndex = 0
+        var endPositionSoundRowIndex = 0
+        var endPositionSoundIndex = 0
+
+        for (let rowIndex = 0; rowIndex < this.state.soundGrid.length; rowIndex++) {
+          let gridRow = this.state.soundGrid[rowIndex]
+          soundGridSize += gridRow.length
+
+          for (let soundIndex = 0; soundIndex < gridRow.length; soundIndex++) {
+            let sound = gridRow[soundIndex]
+
+            if (sound.id === this.startPositionSoundId) {
+              startPositionSoundRowIndex = rowIndex
+              startPositionSoundIndex = soundIndex
+
+            } else if (sound.id === this.endPositionSoundId) {
+              endPositionSoundRowIndex = rowIndex
+              endPositionSoundIndex = soundIndex
+            }
+          }
+        }
+
+        // if the entire soundgrid is full swap the drag button with the the drop button location
+        if (soundGridSize === 28) { // if the entire soundboard is full
+          this.setState({
+            soundGrid: this.state.soundGrid.map((row, rowIndex) => {
+              if (rowIndex === startPositionSoundRowIndex && rowIndex === endPositionSoundRowIndex) { // both start and end are in the same row
+                row[startPositionSoundIndex] = Sounds[this.endPositionSoundId]
+                row[endPositionSoundIndex] = Sounds[this.startPositionSoundId]
+
+              } else if (rowIndex === startPositionSoundRowIndex) { // replace the start position sound with our end position sound
+                row[startPositionSoundIndex] = Sounds[this.endPositionSoundId]
+
+              } else if (rowInd === endPositionSoundRowIndex) { // replace the end position sound wiht our start
+                row[endPositionSoundIndex] = Sounds[this.startPositionSoundId]
+              }
+              return row
+            })
+          })
+        } else if (this.state.soundGrid[endPositionSoundRowIndex].length === 7  && soundGridSize < 28) { // if the target row already has 7 buttons
+          alert("This row is full! Try moving the button to a different row")
+          this.setState({
+            soundGrid: this.state.soundGrid
+          })
+        } else {
+          // soundGrid is not full and the target row isn't full
+          this.setState({
+            soundGrid: this.state.soundGrid.map((row, rowIndex) => {
+
+              if (rowIndex === startPositionSoundRowIndex && rowIndex === endPositionSoundRowIndex) { // both start and end are in the same row
+                const left = row.slice(0, endPositionSoundIndex).filter((sound) => sound.id !== this.startPositionSoundId)
+                const right = row.slice(endPositionSoundIndex).filter((sound) => sound.id !== this.startPositionSoundId)
+
+                return left.concat(Sounds[this.startPositionSoundId], right)
+
+              } else if (rowIndex === startPositionSoundRowIndex) {
+                return row.filter((sound) => sound.id !== this.startPositionSoundId)
+
+              } else if (rowIndex === endPositionSoundRowIndex) {
+                const finalLeft = row.slice(0, endPositionSoundIndex)
+                const finalRight = row.slice(endPositionSoundIndex)
+
+                return finalLeft.concat(Sounds[this.startPositionSoundId], finalRight)
+              }
+              return row
+            })
+          })
+        }
+      }
+
       handleButtonClick(soundId, newSoundName) {
         this.clickedSound = Sounds[soundId]
 
@@ -188,10 +283,17 @@
                 soundGrid: this.state.soundGrid.map((gridRow, index) => {
                   if (index === rowNum) {
 
+                    // creating the new sound's id
                     var newSoundId = Sound.newId++
                     this.newSoundButton.id = newSoundId
+
+                    // adding the name of the new sound to the object of sound names
                     SoundNames[newSoundId] = this.state.newButtonName
+
+                    // to ensure that the name of the new sound button matches with the name added to the SoundNames object
                     this.newSoundButton.name = SoundNames[newSoundId]
+
+                    // adding the new sound to the Sounds object
                     Sounds[newSoundId] = this.newSoundButton
 
                     return gridRow.concat(Sounds[newSoundId])
@@ -222,13 +324,9 @@
               )
             })
           })
-
-        } else if (this.state.currentMode === ModeData.repositionButtonMode) {
-          console.log("you're in", this.state.currentMode)
-
         } else if (this.state.currentMode === ModeData.deleteButtonMode) { // clicking on a button will delete it
           this.setState({
-            soundGrid: this.state.soundGrid.map((row, index) => {
+            soundGrid: this.state.soundGrid.map((row) => {
               return row.filter((sound) => sound.id !== soundId)
             })
           })
@@ -243,32 +341,33 @@
             <ModeContext.Provider value={{
               currentMode: this.state.currentMode,
               switchMode: this.state.switchMode,
-            }}>
-            <div>
-              <div className="modal">
-                <div className="modal-content">
-                  <p>Upload your own sound files! At this time, only WAV files are supported.</p>
-                  <p>New Sound Button Name: </p>
-                  <input
-                    type="text"
-                    value={ this.state.newButtonName }
-                    onChange={ this.handleNewButtonName }
-                  />
-                  <br/>
-                  <input
-                    type="file"
-                    accept="audio/wav"
-                    onChange={ this.handleCreatingNewSoundButton }
-                  />
-                  <div className="modal-confirmation-buttons-container">
-                    <button onClick={ this.handleButtonClick }>Add Sound Button</button>
-                    <button onClick={ this.returnToPlaySoundMode }>Cancel</button>
+              }}>
+              <div>
+                <div className="modal">
+                  <div className="modal-content">
+                    <p>Upload your own sound files! At this time, only WAV files are supported.</p>
+                    <p>New Sound Button Name: </p>
+                    <input
+                      type="text"
+                      autoFocus="true"
+                      value={ this.state.newButtonName }
+                      onChange={ this.handleNewButtonName }
+                    />
+                    <br/>
+                    <input
+                      type="file"
+                      accept="audio/wav"
+                      onChange={ this.handleCreatingNewSoundButton }
+                    />
+                    <div className="modal-confirmation-buttons-container">
+                      <button onClick={ this.handleButtonClick }>Add Sound Button</button>
+                      <button onClick={ this.returnToPlaySoundMode }>Cancel</button>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <h1>Playback</h1>
-              <h3>Welcome to your personalized soundboard</h3>
+                <h1>Playback</h1>
+                <h3>Welcome to your personalized soundboard</h3>
                 <div className="main-content-container">
                   <SoundGrid
                     grid={ this.state.soundGrid }
@@ -278,8 +377,36 @@
                     <SideNav />
                   </div>
                 </div>
-            </div>
-          </ModeContext.Provider>
+              </div>
+            </ModeContext.Provider>
+          )
+        } else if (this.state.currentMode === ModeData.helpMode) {
+          return (
+            <ModeContext.Provider value={{
+              currentMode: this.state.currentMode,
+              switchMode: this.state.switchMode,
+              }}>
+              <div>
+                <div className="modal">
+                  <div className="modal-content">
+                    <p>Upload your own sound files! At this time, only WAV files are supported.</p>
+                    <p>New Sound Button Name: </p>
+                  </div>
+                </div>
+
+                <h1>Playback</h1>
+                <h3>Welcome to your personalized soundboard</h3>
+                <div className="main-content-container">
+                  <SoundGrid
+                    grid={ this.state.soundGrid }
+                    handleButtonClick={ this.handleButtonClick }
+                  />
+                  <div className="SideNav-container">
+                    <SideNav />
+                  </div>
+                </div>
+              </div>
+            </ModeContext.Provider>
           )
         }
         return (
@@ -294,6 +421,8 @@
                   <SoundGrid
                     grid={ this.state.soundGrid }
                     handleButtonClick={ this.handleButtonClick }
+                    handleButtonDrag={ this.handleButtonDrag }
+                    handleButtonDrop={ this.handleButtonDrop }
                   />
                   <div className="SideNav-container">
                     <SideNav />
@@ -337,6 +466,8 @@
       constructor(props) {
         super(props)
         this.handleButtonClick = props.handleButtonClick
+        this.handleButtonDrag = props.handleButtonDrag
+        this.handleButtonDrop = props.handleButtonDrop
       }
       render () {
         return (
@@ -348,6 +479,8 @@
                     row={ row }
                     key={ index }
                     handleButtonClick={ this.handleButtonClick }
+                    handleButtonDrag={ this.handleButtonDrag }
+                    handleButtonDrop={ this.handleButtonDrop }
                   />
                 )
               })
@@ -362,6 +495,8 @@
       constructor(props) {
         super(props)
         this.handleButtonClick = props.handleButtonClick
+        this.handleButtonDrag = props.handleButtonDrag
+        this.handleButtonDrop = props.handleButtonDrop
       }
       render () {
         return (
@@ -373,6 +508,8 @@
                     sound={ sound }
                     key={ index }
                     handleButtonClick={ this.handleButtonClick }
+                    handleButtonDrag={ this.handleButtonDrag }
+                    handleButtonDrop={ this.handleButtonDrop }
                   />
                 )
               })
@@ -390,14 +527,41 @@
           audio: props.sound.audio,
           soundId: props.sound.id,
         }
+        this.playSound = false
         this.handleNameChange = this.handleNameChange.bind(this)
+        this.handleDragOver = this.handleDragOver.bind(this)
+        this.handleKeyDown = this.handleKeyDown.bind(this)
       }
       handleNameChange(event) {
         SoundNames[this.state.soundId] = event.target.value
       }
+
+      handleKeyDown(keyPressed) {
+        if (keyPressed.ctrlKey) {
+          this.playSound = true
+        }
+      }
+
       onButtonClick() {
+        if (this.playSound === true) {
+          this.state.audio.load()
+          this.state.audio.play()
+        }
         this.props.handleButtonClick(this.props.sound.id, SoundNames[this.state.soundId])
       }
+
+      onButtonDrag() {
+        this.props.handleButtonDrag(this.props.sound.id)
+      }
+
+      handleDragOver(dragEvent) {
+        dragEvent.preventDefault();
+      }
+
+      onButtonDrop() {
+        this.props.handleButtonDrop(this.props.sound.id)
+      }
+
       render () {
         if (this.context.currentMode === ModeData.renameButtonMode) {
           return (
@@ -411,7 +575,15 @@
         }
         return (
           <div>
-            <button className="soundButtonIcon" onClick={ () => this.onButtonClick() }>
+            <button
+              className="soundButtonIcon"
+              onKeyDown={ this.handleKeyDown }
+              onClick={ () => this.onButtonClick() }
+              draggable={ this.context.currentMode.isButtonDraggable }
+              onDragStart={ () => this.onButtonDrag() }
+              onDragOver={ this.handleDragOver }
+              onDrop={ () => this.onButtonDrop() }
+            >
               <p className="soundButtonText"> { this.props.sound.name } </p>
             </button>
           </div>
