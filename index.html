@@ -270,7 +270,6 @@
         this.clickedSound = Sounds[soundId]
 
         if (this.state.currentMode === ModeData.playSoundMode) { // clicking on buttons will play their audio
-          console.log(this.clickedSound)
           this.clickedSound.audio.load()
           this.clickedSound.audio.play()
 
@@ -278,7 +277,6 @@
           const grid = this.state.soundGrid
 
           for (var rowNum = grid.length - 1; rowNum > -1; rowNum--) {
-            console.log("the row num", rowNum)
             if (grid[rowNum].length < 7) {
               this.setState({
                 soundGrid: this.state.soundGrid.map((gridRow, index) => {
@@ -302,7 +300,6 @@
               break
             }
           }
-          console.log(Sounds)
           if (rowNum === -1) {
             alert("Your board is full! Try deleteing a button before adding more.")
           }
