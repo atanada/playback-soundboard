@@ -107,3 +107,23 @@ ul {
 .modal-confirmation-buttons-container button {
   margin-right: 2em;
 }
+
+.help-modal-content {
+  background-color: #fefefe;
+  margin: 19% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 60%;
+}
+
+.help-modal-header {
+  font-weight: bold;
+}
+
+td {
+  width: 7em;
+}
+
+.description {
+  width: 9em;
+}
