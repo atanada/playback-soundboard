@@ -4,6 +4,7 @@
 
 body {
   margin: 0;
+  zoom: 80%;
 }
 
 #app > div {
@@ -20,6 +21,7 @@ body {
   font-size: 1em;
   text-shadow: 1px 1px 5px black, -1px -1px 5px black;
   margin: 8px 13px;
+  outline: none;
 }
 
 .soundButtonText {
